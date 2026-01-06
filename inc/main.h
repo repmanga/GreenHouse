@@ -3,7 +3,6 @@
 
 #include <Arduino.h>
 #include <Wire.h>
-#include "GreenHouse.h"
 #include "SensorManager.h"
 
 #endif

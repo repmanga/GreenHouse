@@ -1,0 +1,27 @@
+[submodule "lib/Adafruit_BusIO"]
+	path = lib/Adafruit_BusIO
+	url = https://github.com/adafruit/Adafruit_BusIO.git
+[submodule "lib/LiquidCrystal_I2C"]
+	path = lib/LiquidCrystal_I2C
+	url = https://github.com/fdebrabander/Arduino-LiquidCrystal-I2C-library.git
+[submodule "lib/Adafruit_VEML7700"]
+	path = lib/Adafruit_VEML7700
+	url = https://github.com/adafruit/Adafruit_VEML7700.git
+[submodule "lib/ens16x"]
+	path = lib/ens16x
+	url = https://github.com/sciosense/ens16x-arduino.git
+[submodule "lib/Time_lib"]
+	path = lib/Time_lib
+	url = https://github.com/PaulStoffregen/Time.git
+[submodule "lib/AHT_Sensor"]
+	path = lib/AHT_Sensor
+	url = https://github.com/Thinary/AHT_Sensor.git
+[submodule "lib/DS1307RTC"]
+	path = lib/DS1307RTC
+	url = https://github.com/PaulStoffregen/DS1307RTC.git
+[submodule "lib/EncButton"]
+	path = lib/EncButton
+	url = https://github.com/GyverLibs/EncButton.git
+[submodule "lib/HC-SR04"]
+	path = lib/HC-SR04
+	url = https://github.com/gamegine/HCSR04-ultrasonic-sensor-lib.git
