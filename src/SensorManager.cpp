@@ -190,8 +190,6 @@ float SensorManager::read_air_quality_sensor()
 bool SensorManager::check_soil_sensor(uint8_t pin)
 {
   int value = analogRead(pin);
-  // Проверяем, что датчик возвращает разумные значения
-  // Значение 0 или 1023 может указывать на проблему
   return (value > 10 && value < 1013);
 }
 

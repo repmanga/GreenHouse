@@ -11,7 +11,6 @@
 
 class SensorManager {
 private:
-    // Структура для данных
     struct SensorReadings {
         float light_lux;
         float air_temp;
@@ -33,17 +32,14 @@ private:
         bool water_sensor_ok;
     };
     
-    // Данные
     SensorReadings readings;
     
-    // Объекты датчиков (ТЕПЕРЬ ЧЛЕНЫ КЛАССА!)
     Adafruit_VEML7700 veml;
     AHT_Sensor_Class aht;
     ENS160 ens160;
     HCSR04 hc;
-    tmElements_t tm;  // Для RTC
+    tmElements_t tm;
     
-    // Константы
     static const uint8_t TRIG_PIN = 11;
     static const uint8_t ECHO_PIN = 12;
     static const uint8_t SOIL_1_PIN = A0;
@@ -51,11 +47,10 @@ private:
     static const uint16_t LIGHT_LOW_THRESHOLD = 10000;
     static const uint16_t LIGHT_HIGH_THRESHOLD = 10000;
     static const uint16_t TANK_DIAMETER_CM = 100;
-    static const uint16_t TANK_HEIGHT_CM = 30;  // Добавили высоту бака!
+    static const uint16_t TANK_HEIGHT_CM = 30; 
     static const uint8_t SOIL_DRY_VALUE = 620;
     static const uint8_t SOIL_WET_VALUE = 310;
     
-    // Приватные методы (реальное чтение датчиков)
     bool init_light_sensor();
     bool init_air_temp_hum_sensor();
     bool init_air_qual_sensor();
