@@ -1,9 +1,11 @@
 #include "main.h"
 
-void setup() {
+SensorManager Sensors;
 
+void setup() {
+    Sensors.init();
 }
 
-void loop(){
-  
+void loop() {
+    
 }

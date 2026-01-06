@@ -1,238 +1,259 @@
 #include "SensorManager.h"
 
-#define ENS160_ADDRESS 0x52
+// Конструктор
+SensorManager::SensorManager() : hc(TRIG_PIN, ECHO_PIN)
+{
+  float light_lux = 0;
+  float air_temp = 0;
+  float air_qual = 0;
+  float air_hum = 0;
+  float water_dist_cm = 0;
+  float water_volume_ml = 0;
+  uint8_t soil_moist_1 = 0;
+  uint8_t soil_moist_2 = 0;
+  uint8_t hour = 0;
+  uint8_t minute = 0;
+  uint8_t second = 0;
+  uint8_t day = 1;
+  uint8_t month = 1;
+  uint8_t year = 2026;
 
-Adafruit_VEML7700 veml = Adafruit_VEML7700();
-AHT_Sensor_Class AHT10;
-ENS160 ens160;
-tmElements_t tm;
-HCSR04 hc(TRIG_PIN,ECHO_PIN);
-
-const char *monthName[12] = {
-  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-};
-
-SensorManager::SensorManager() {
-  readings.air_qual = 0;
-  readings.water_dist = 0;
-  readings.water_volume = 0;
-  readings.air_temp = 0;
-  readings.air_qual = 0;
-  readings.air_hum = 0;
-  readings.hour = 0;
-  readings.minute = 0;
-  readings.second = 0;
-  readings.day = 1;
-  readings.month = 1;
-  readings.year = 2026;
-  readings.light_sensor_OK = false;
-  readings.air_temp_sensor_OK = false;
-  readings.soil_sensor_1_OK = false;
-  readings.soil_sensor_2_OK = false;
-  readings.RTC_OK = false;
-  readings.water_level_sensor_OK = false;
-  diameter = 100;
+  bool light_sensor_ok = false;
+  bool air_temp_sensor_ok = false;
+  bool air_qual_sensor_ok = false;
+  bool soil_sensor_1_ok = false;
+  bool soil_sensor_2_ok = false;
+  bool rtc_ok = false;
+  bool water_sensor_ok = false;
 }
 
-bool SensorManager::init(){
+bool SensorManager::init()
+{
+
   Wire.begin();
-  pinMode(__TRIG_PIN, OUTPUT);
-  pinMode(__ECHO_PIN, INPUT);
-  pinMode(__SOIL_1_PIN, INPUT);
-  pinMode(__SOIL_2_PIN, INPUT);
-  All_OK = true;
+
+  pinMode(TRIG_PIN, OUTPUT);
+  pinMode(ECHO_PIN, INPUT);
+  digitalWrite(TRIG_PIN, LOW);
+  pinMode(SOIL_1_PIN, INPUT);
+  pinMode(SOIL_2_PIN, INPUT);
+
+  bool all_ok = true;
 
   if (!init_air_qual_sensor())
   {
-    readings.air_qual_sensor_OK = false;
-    All_OK = false;
-  } else {
-    readings.air_qual_sensor_OK = true;
+    Serial.println(F("ENS160 failed"));
+    all_ok = false;
   }
 
   delay(10);
 
   if (!init_air_temp_hum_sensor())
   {
-    readings.air_temp_sensor_OK = false;
-    All_OK = false;
-  } else {
-    readings.air_temp_sensor_OK = true;
+    Serial.println(F("AHT10 failed"));
+    all_ok = false;
   }
 
   delay(10);
 
   if (!init_light_sensor())
   {
-    readings.light_sensor_OK = false;
-    All_OK = false;
-  } else {
-    readings.light_sensor_OK = true;
+    Serial.println(F("VEML7700 failed"));
+    all_ok = false;
   }
 
   delay(10);
 
-  if (!init_soil_moist_sensor(__SOIL_1_PIN))
+  // Проверка датчиков почвы
+  readings.soil_sensor_1_ok = check_soil_sensor(SOIL_1_PIN);
+  readings.soil_sensor_2_ok = check_soil_sensor(SOIL_2_PIN);
+
+  if (!readings.soil_sensor_1_ok)
   {
-    readings.soil_sensor_1_OK = false;
-    All_OK = false;
-  } else {
-    readings.soil_sensor_1_OK = true;
+    Serial.println(F("Soil sensor 1 failed"));
+    all_ok = false;
   }
 
-  delay(10);
-  
- if (!init_soil_moist_sensor(__SOIL_2_PIN))
+  if (!readings.soil_sensor_2_ok)
   {
-    readings.soil_sensor_2_OK = false;
-    All_OK = false;
-  } else {
-    readings.soil_sensor_2_OK = true;
+    Serial.println(F("Soil sensor 2 failed"));
+    all_ok = false;
   }
 
   delay(10);
-  
-  if (!init_RTC())
+
+  if (!init_rtc())
   {
-    readings.RTC_OK = false;
-    All_OK = false;
-  } else {
-    readings.RTC_OK = true;
+    Serial.println(F("RTC failed"));
+    all_ok = false;
   }
 
-  delay(10);
-  
-  if (!init_water_level_sensor())
-  {
-    readings.water_level_sensor_OK = false;
-    All_OK = false;
-  } else {
-    readings.water_level_sensor_OK = true;
-  }
-
-  delay(10);
-  
-  return All_OK;
+  Serial.println(F("Sensor initialization complete"));
+  return all_ok;
 }
 
-void SensorManager::update_all() {
-  readings.air_temp = readAirTemp();
-  readings.air_hum = readAirHum();
-  readings.air_qual = readAirQuality();
-  readings.light_Lux = readLightLevel();
-  readings.soil_moist_1 = readSoilMoisture(__SOIL_1_PIN);
-  readings.soil_moist_2 = readSoilMoisture(__SOIL_2_PIN);
-  readings.water_dist = readWaterLevel();
-  readings.water_volume = readings.water_dist * 3.14159 * (diameter^2)/4;
-  RTC.read(tm);
-  readings.second = tm.Second;
-  readings.minute = tm.Minute;
-  readings.hour = tm.Hour;
-  readings.day = tm.Day;
-  readings.month = tm.Month;
-  readings.year = tm.Year;
-}
+void SensorManager::update_all()
+{
 
-bool init_light_sensor() {
-  if (!veml.begin()) {
-      return false;
-  } else {
-    veml.setLowThreshold(light_low_threshold);
-    veml.setHighThreshold(light_high_threshold);
-    veml.interruptEnable(false);
-    return true;
+  if (readings.light_sensor_ok)
+  {
+    readings.light_lux = read_light_sensor();
+  }
+
+  if (readings.air_temp_sensor_ok)
+  {
+    readings.air_temp = read_air_temp_sensor();
+    readings.air_hum = read_air_hum_sensor();
+  }
+
+  if (readings.air_qual_sensor_ok)
+  {
+    readings.air_qual = read_air_quality_sensor();
+  }
+
+  if (readings.soil_sensor_1_ok)
+  {
+    readings.soil_moist_1 = read_soil_sensor(SOIL_1_PIN);
+  }
+
+  if (readings.soil_sensor_2_ok)
+  {
+    readings.soil_moist_2 = read_soil_sensor(SOIL_2_PIN);
+  }
+
+  if (readings.water_sensor_ok)
+  {
+    readings.water_dist_cm = read_water_distance_sensor();
+    readings.water_volume_ml = calculate_water_volume(readings.water_dist_cm);
+  }
+
+  if (readings.rtc_ok)
+  {
+    read_rtc_time();
   }
 }
 
-float readLightLevel() {
+bool SensorManager::init_light_sensor()
+{
+  if (!veml.begin())
+  {
+    return false;
+  }
+  veml.setLowThreshold(LIGHT_LOW_THRESHOLD);
+  veml.setHighThreshold(LIGHT_HIGH_THRESHOLD);
+  veml.interruptEnable(false);
+  readings.light_sensor_ok = true;
+  return true;
+}
+
+float SensorManager::read_light_sensor()
+{
   return veml.readLux();
 }
 
-bool init_air_temp_hum_sensor() {
-  if(!AHT10.begin(eAHT_SensorAddress_default)){
-    return false;
-  } else {
-    return true;
-  }
-}
-
-float readAirTemp() {
-  return AHT10.GetTemperature();
-}
-
-float readAirHum() {
-  return AHT10.GetHumidity();
-}
-
-bool init_air_qual_sensor() {
-  ens160.begin(&Wire, ENS160_ADDRESS);
-  if(!ens160.init()){
-    return false;
-  } else {
-    return true;
-  }
-}
-
-float readAirQuality() {
-  return ens160.getAirQualityIndex_UBA(); // TODO: test this method
-}
-
-bool init_soil_moist_sensor(uint8_t __SOIL_PIN) {
-  if (!(analogRead(__SOIL_PIN) > 0 || analogRead(__SOIL_PIN) < 1024))
+bool SensorManager::init_air_temp_hum_sensor()
+{
+  if (!aht.begin(eAHT_SensorAddress_default))
   {
     return false;
-  } else {
-    return true;
   }
-}
-
-bool init_soil_moist_sensor(uint8_t __SOIL_PIN) {
-  return map(analogRead(__SOIL_PIN), 0, 1024, 0, 100);
-}
-
-bool init_RTC() {
-  bool parse=false;
-  bool config=false;
-  if (getDate(__DATE__) && getTime(__TIME__)) {
-    parse = true;
-    // and configure the RTC with this info
-    if (RTC.write(tm)) {
-      config = true;
-    }
-  }
-  delay(200);
+  readings.air_temp_sensor_ok = true;
   return true;
 }
 
-bool getTime(const char *str)
+float SensorManager::read_air_temp_sensor()
 {
-  int Hour, Min, Sec;
-
-  if (sscanf(str, "%d:%d:%d", &Hour, &Min, &Sec) != 3) return false;
-  tm.Hour = Hour;
-  tm.Minute = Min;
-  tm.Second = Sec;
-  return true;
+  return aht.GetTemperature();
 }
 
-bool getDate(const char *str)
+float SensorManager::read_air_hum_sensor()
 {
-  char Month[12];
-  int Day, Year;
-  uint8_t monthIndex;
+  return aht.GetHumidity();
+}
 
-  if (sscanf(str, "%s %d %d", Month, &Day, &Year) != 3) return false;
-  for (monthIndex = 0; monthIndex < 12; monthIndex++) {
-    if (strcmp(Month, monthName[monthIndex]) == 0) break;
+bool SensorManager::init_air_qual_sensor()
+{
+  ens160.begin(&Wire, 0x52); // ENS160_ADDRESS
+  if (!ens160.init())
+  {
+    return false;
   }
-  if (monthIndex >= 12) return false;
-  tm.Day = Day;
-  tm.Month = monthIndex + 1;
-  tm.Year = CalendarYrToTm(Year);
+  readings.air_qual_sensor_ok = true;
   return true;
 }
 
-bool init_water_level_sensor() {
+float SensorManager::read_air_quality_sensor()
+{
+  return ens160.getAirQualityIndex_UBA();
+}
 
+bool SensorManager::check_soil_sensor(uint8_t pin)
+{
+  int value = analogRead(pin);
+  // Проверяем, что датчик возвращает разумные значения
+  // Значение 0 или 1023 может указывать на проблему
+  return (value > 10 && value < 1013);
+}
+
+uint8_t SensorManager::read_soil_sensor(uint8_t pin)
+{
+  int raw = analogRead(pin);
+  return convert_soil_reading(raw);
+}
+
+uint8_t SensorManager::convert_soil_reading(int raw_value)
+{
+  int percentage = map(raw_value, SOIL_DRY_VALUE, SOIL_WET_VALUE, 0, 100);
+  return constrain(percentage, 0, 100);
+}
+
+bool SensorManager::init_rtc()
+{
+  if (!RTC.read(tm))
+  {
+    return false;
+  }
+  readings.rtc_ok = true;
+  return true;
+}
+
+void SensorManager::read_rtc_time()
+{
+  if (RTC.read(tm))
+  {
+    readings.second = tm.Second;
+    readings.minute = tm.Minute;
+    readings.hour = tm.Hour;
+    readings.day = tm.Day;
+    readings.month = tm.Month;
+    readings.year = tmYearToCalendar(tm.Year);
+  }
+  else
+  {
+    readings.rtc_ok = false;
+  }
+}
+
+float SensorManager::read_water_distance_sensor()
+{
+  return hc.dist(); // расстояние в см
+}
+
+float SensorManager::calculate_water_volume(float distance_cm)
+{
+
+  float water_height_cm = TANK_HEIGHT_CM - distance_cm;
+
+  if (water_height_cm < 0)
+  {
+    water_height_cm = 0;
+  }
+  if (water_height_cm > TANK_HEIGHT_CM)
+  {
+    water_height_cm = TANK_HEIGHT_CM;
+  }
+  float radius_cm = TANK_DIAMETER_CM / 2.0;
+  float volume_cm3 = PI * radius_cm * radius_cm * water_height_cm;
+
+  return volume_cm3;
 }

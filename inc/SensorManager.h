@@ -8,85 +8,96 @@
 #include <DS1307RTC.h>
 #include <ens160.h>
 #include <HCSR04.h>
-#include <time.h>
 
-uint16_t light_low_threshold = 10000;
-uint16_t light_high_threshold = 10000;
-uint16_t diameter = 100;
-uint16_t pump_flow = 100;
-const uint8_t TRIG_PIN = 11;
-const uint8_t ECHO_PIN = 12;
-
-struct SensorReadings {
-
-  float light_Lux;
-
-  float air_temp;
-
-  float air_qual; // TODO: replace if possible with int
-  uint8_t air_hum;
-
-  float water_dist;
-  float water_volume;
-  
-  uint8_t soil_moist_1;
-  uint8_t soil_moist_2;
-
-  uint8_t hour;
-  uint8_t minute;
-  uint8_t second;
-  uint8_t day;
-  uint8_t month;
-  uint8_t year;
-
-  bool light_sensor_OK;
-  bool air_temp_sensor_OK;
-  bool air_qual_sensor_OK;
-  bool soil_sensor_1_OK;
-  bool soil_sensor_2_OK;
-  bool RTC_OK;
-  bool water_level_sensor_OK;
-};
-
-class SensorManager
-{
+class SensorManager {
 private:
-
-  SensorReadings readings;
-  uint8_t __soil_Dry_val = 620;
-  uint8_t __soil_Wet_val = 310;
-  const uint8_t __SOIL_1_PIN = A0;
-  const uint8_t __SOIL_2_PIN = A1;
-  bool All_OK;
-
-  bool init_light_sensor();
-  bool init_air_qual_sensor();
-  bool init_air_temp_hum_sensor();
-  bool init_soil_moist_sensor(uint8_t __SOIL_PIN);
-  bool init_RTC();
-
+    // Структура для данных
+    struct SensorReadings {
+        float light_lux;
+        float air_temp;
+        float air_qual;
+        float air_hum;
+        float water_dist_cm;
+        float water_volume_ml;
+        uint8_t soil_moist_1;
+        uint8_t soil_moist_2;
+        uint8_t hour, minute, second;
+        uint8_t day, month, year;
+        
+        bool light_sensor_ok;
+        bool air_temp_sensor_ok;
+        bool air_qual_sensor_ok;
+        bool soil_sensor_1_ok;
+        bool soil_sensor_2_ok;
+        bool rtc_ok;
+        bool water_sensor_ok;
+    };
+    
+    // Данные
+    SensorReadings readings;
+    
+    // Объекты датчиков (ТЕПЕРЬ ЧЛЕНЫ КЛАССА!)
+    Adafruit_VEML7700 veml;
+    AHT_Sensor_Class aht;
+    ENS160 ens160;
+    HCSR04 hc;
+    tmElements_t tm;  // Для RTC
+    
+    // Константы
+    static const uint8_t TRIG_PIN = 11;
+    static const uint8_t ECHO_PIN = 12;
+    static const uint8_t SOIL_1_PIN = A0;
+    static const uint8_t SOIL_2_PIN = A1;
+    static const uint16_t LIGHT_LOW_THRESHOLD = 10000;
+    static const uint16_t LIGHT_HIGH_THRESHOLD = 10000;
+    static const uint16_t TANK_DIAMETER_CM = 100;
+    static const uint16_t TANK_HEIGHT_CM = 30;  // Добавили высоту бака!
+    static const uint8_t SOIL_DRY_VALUE = 620;
+    static const uint8_t SOIL_WET_VALUE = 310;
+    
+    // Приватные методы (реальное чтение датчиков)
+    bool init_light_sensor();
+    bool init_air_temp_hum_sensor();
+    bool init_air_qual_sensor();
+    bool init_rtc();
+    
+    float read_light_sensor();
+    float read_air_temp_sensor();
+    float read_air_hum_sensor();
+    float read_air_quality_sensor();
+    uint8_t read_soil_sensor(uint8_t pin);
+    float read_water_distance_sensor();
+    void read_rtc_time();
+    
+    // Вспомогательные
+    bool check_soil_sensor(uint8_t pin);
+    float calculate_water_volume(float distance_cm);
+    uint8_t convert_soil_reading(int raw_value);
+    
 public:
-
-  SensorManager();
-  
-  bool init();
-  void update_all();
-
-  SensorReadings getReadings();
-
-  bool is_Light_Sensor_OK() { return readings.light_sensor_OK; };
-  bool is_Water_Sensor_OK() { return readings.water_level_sensor_OK; };
-  bool is_Air_temp_hum_Sensor_OK() { return readings.air_temp_sensor_OK; };
-  bool is_Soil_Sensor_1_OK() { return readings.soil_sensor_1_OK; };
-  bool is_Soil_Sensor_2_OK() { return readings.soil_sensor_2_OK; };
-  bool is_RTC_OK() { return readings.RTC_OK; };
-  
-  float readLightLevel();
-  float readWaterLevel();
-  float readAirTemp();
-  float readAirHum();
-  float readAirQuality();
-  uint8_t readSoilMoisture(uint8_t __SOIL_PIN);
+    SensorManager();
+    
+    bool init();
+    void update_all();
+    
+    SensorReadings get_readings() const { return readings; }
+    
+    bool is_light_sensor_ok() const { return readings.light_sensor_ok; }
+    bool is_air_temp_sensor_ok() const { return readings.air_temp_sensor_ok; }
+    bool is_air_qual_sensor_ok() const { return readings.air_qual_sensor_ok; }
+    bool is_soil_sensor_1_ok() const { return readings.soil_sensor_1_ok; }
+    bool is_soil_sensor_2_ok() const { return readings.soil_sensor_2_ok; }
+    bool is_rtc_ok() const { return readings.rtc_ok; }
+    bool is_water_sensor_ok() const { return readings.water_sensor_ok; }
+    
+    float get_light_level() const { return readings.light_lux; }
+    float get_air_temp() const { return readings.air_temp; }
+    float get_air_humidity() const { return readings.air_hum; }
+    float get_air_quality() const { return readings.air_qual; }
+    uint8_t get_soil_moisture_1() const { return readings.soil_moist_1; }
+    uint8_t get_soil_moisture_2() const { return readings.soil_moist_2; }
+    float get_water_distance() const { return readings.water_dist_cm; }
+    float get_water_volume() const { return readings.water_volume_ml; }
 
 };
 
