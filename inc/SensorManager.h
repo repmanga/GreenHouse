@@ -10,7 +10,10 @@
 #include <HCSR04.h>
 #include <time.h>
 
-// Цель -- создать класс для управления всеми сенсорами
+uint16_t light_low_threshold = 10000;
+uint16_t light_high_threshold = 10000;
+uint16_t diameter = 100;
+uint16_t pump_flow = 100;
 
 struct SensorReadings {
 
@@ -18,14 +21,12 @@ struct SensorReadings {
 
   float air_temp;
 
-  float air_qual; // TODO: посмотреть, можно ли избавиться от float
+  float air_qual; // TODO: replace if possible with int
   uint8_t air_hum;
 
   float water_dist;
   float water_volume;
-
-  uint8_t soil_moist_1_raw;
-  uint8_t soil_moist_2_raw;
+  
   uint8_t soil_moist_1;
   uint8_t soil_moist_2;
 
@@ -52,8 +53,6 @@ private:
   SensorReadings readings;
   uint8_t __soil_Dry_val = 620;
   uint8_t __soil_Wet_val = 310;
-
-  const uint16_t diameter, pump_flow = 100;
   const uint8_t __SOIL_1_PIN = A0;
   const uint8_t __SOIL_2_PIN = A1;
   const uint8_t __TRIG_PIN = 11;
@@ -89,8 +88,7 @@ public:
   float readAirHum();
   float readAirQuality();
   uint8_t readSoilMoisture(uint8_t __SOIL_PIN);
-  void readTime();
-  void readDate();
+
 };
 
 #endif
