@@ -14,6 +14,8 @@ uint16_t light_low_threshold = 10000;
 uint16_t light_high_threshold = 10000;
 uint16_t diameter = 100;
 uint16_t pump_flow = 100;
+const uint8_t TRIG_PIN = 11;
+const uint8_t ECHO_PIN = 12;
 
 struct SensorReadings {
 
@@ -55,8 +57,6 @@ private:
   uint8_t __soil_Wet_val = 310;
   const uint8_t __SOIL_1_PIN = A0;
   const uint8_t __SOIL_2_PIN = A1;
-  const uint8_t __TRIG_PIN = 11;
-  const uint8_t __ECHO_PIN = 12;
   bool All_OK;
 
   bool init_light_sensor();
@@ -64,7 +64,6 @@ private:
   bool init_air_temp_hum_sensor();
   bool init_soil_moist_sensor(uint8_t __SOIL_PIN);
   bool init_RTC();
-  bool init_water_level_sensor();
 
 public:
 

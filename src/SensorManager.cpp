@@ -6,6 +6,7 @@ Adafruit_VEML7700 veml = Adafruit_VEML7700();
 AHT_Sensor_Class AHT10;
 ENS160 ens160;
 tmElements_t tm;
+HCSR04 hc(TRIG_PIN,ECHO_PIN);
 
 const char *monthName[12] = {
   "Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -232,4 +233,6 @@ bool getDate(const char *str)
   return true;
 }
 
-bool init_water_level_sensor();
+bool init_water_level_sensor() {
+
+}
