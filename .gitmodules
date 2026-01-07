@@ -25,3 +25,6 @@
 [submodule "lib/HC-SR04"]
 	path = lib/HC-SR04
 	url = https://github.com/gamegine/HCSR04-ultrasonic-sensor-lib.git
+[submodule "lib/AHT10_lib"]
+	path = lib/AHT10_lib
+	url = https://github.com/enjoyneering/AHTxx.git

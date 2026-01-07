@@ -2,7 +2,7 @@
 #define DEVICE_MANAGER_H
 
 #include <Arduino.h>
-
+#include <Wire.h>
 class DeviceManager
 {
 private:

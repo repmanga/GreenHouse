@@ -3,11 +3,11 @@
 
 #include <Arduino.h>
 #include <Wire.h>
-#include <Adafruit_VEML7700.h>
-#include <Thinary_AHT_Sensor.h>
-#include <DS1307RTC.h>
-#include <ens160.h>
-#include <HCSR04.h>
+#include "Adafruit_VEML7700.h"
+#include 
+#include "DS1307RTC.h"
+#include "ens160.h"
+#include "HCSR04.h"
 
 class SensorManager {
 private:
