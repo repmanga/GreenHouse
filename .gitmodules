@@ -7,9 +7,6 @@
 [submodule "lib/Adafruit_VEML7700"]
 	path = lib/Adafruit_VEML7700
 	url = https://github.com/adafruit/Adafruit_VEML7700.git
-[submodule "lib/ens16x"]
-	path = lib/ens16x
-	url = https://github.com/sciosense/ens16x-arduino.git
 [submodule "lib/Time_lib"]
 	path = lib/Time_lib
 	url = https://github.com/PaulStoffregen/Time.git
@@ -28,3 +25,6 @@
 [submodule "lib/AHT10_lib"]
 	path = lib/AHT10_lib
 	url = https://github.com/enjoyneering/AHTxx.git
+[submodule "lib/ENS160_lib"]
+	path = lib/ENS160_lib
+	url = https://github.com/adafruit/ENS160_driver
