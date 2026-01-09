@@ -1,10 +1,11 @@
 #include "main.h"
 
 // Пины
+/*
 const uint8_t ENC_CLK = 2;
 const uint8_t ENC_DT = 3;
 const uint8_t ENC_SW = 4;
-
+*/
 const uint8_t LIGHT_PIN = 5;
 const uint8_t FAN_PIN = 6;
 const uint8_t PUMP_PIN = 7;
@@ -16,7 +17,7 @@ const uint8_t LCD_ROWS = 4;
 */
 // Глобальные объекты
 SensorManager sensors;
-DeviceManager devices(LIGHT_PIN, FAN_PIN, PUMP_PIN, LED_PIN);
+DeviceManager devices(LIGHT_PIN, FAN_PIN, PUMP_PIN);
 
 bool systemAutoMode = true;
 
@@ -56,36 +57,40 @@ void loop() {
     
     // 3. Обновление UI
     ui.update();
-    
-    // 4. Обновление устройств (для насоса с автостопом)
-    devices.update();
     */
-    // 5. Автоматический режим
+    //4. Обновление устройств (для насоса с автостопом)
+    devices.update();
+
     if (systemAutoMode) {
         runAutoMode();
     }
-
-    // Небольшая задержка для стабильности
     delay(10);
 }
+
 // TODO: complete autologic with watering, complete error handler
 void runAutoMode() {
     // Простейшая логика автоматического режима
     static uint32_t lastAutoAction = 0;
     if (millis() - lastAutoAction > 10000) {  // Каждые 10 секунд
         lastAutoAction = millis();
-        // Пример: включаем свет если темно
+        // Включаем свет если темно
         if (sensors.get_light_level() < 100 && !devices.isLightOn()) {
             devices.setLight(true);
         } else if (sensors.get_light_level() > 500 && devices.isLightOn()) {
             devices.setLight(false);
         }
-        // Пример: включаем вентилятор если жарко
-        if (sensors.get_air_temp() > 28 && !devices.isFanOn()) {
+        // Включаем вентилятор если валжно или жарко
+        if (((sensors.get_air_temp() > 28) || (sensors.get_air_humidity() > 90)) && !devices.isFanOn()) {
             devices.setFan(true);
-        } else if (sensors.get_air_temp() < 25 && devices.isFanOn()) {
+        } else if ((sensors.get_air_temp() < 25  || (sensors.get_air_humidity() < 70)) && devices.isFanOn()) {
             devices.setFan(false);
         }
+        // Включаем насос если слишком сухо
+        //TODO:Fix magic number usage
+        if (((sensors.get_soil_moisture_1() + sensors.get_soil_moisture_2()) / 2 < 500) && !devices.isPumpOn()) {
+            devices.startPump(100);
+        }
+
     }
 }
 

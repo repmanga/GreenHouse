@@ -1,6 +1,5 @@
 #include "SensorManager.h"
 
-// Конструктор
 SensorManager::SensorManager() : hc(TRIG_PIN, ECHO_PIN)
 {
   float light_lux = 0;
@@ -9,15 +8,16 @@ SensorManager::SensorManager() : hc(TRIG_PIN, ECHO_PIN)
   float air_hum = 0;
   float water_dist_cm = 0;
   float water_volume_ml = 0;
-  uint8_t soil_moist_1 = 0;
-  uint8_t soil_moist_2 = 0;
+  uint16_t soil_moist_1 = 0;
+  uint16_t soil_moist_2 = 0;
   uint8_t hour = 0;
   uint8_t minute = 0;
   uint8_t second = 0;
   uint8_t day = 1;
   uint8_t month = 1;
-  uint8_t year = 2026;
-
+  uint16_t year = 2026;
+  //TODO: Add error handler, which process the following data
+  /*
   bool light_sensor_ok = false;
   bool air_temp_sensor_ok = false;
   bool air_qual_sensor_ok = false;
@@ -25,6 +25,7 @@ SensorManager::SensorManager() : hc(TRIG_PIN, ECHO_PIN)
   bool soil_sensor_2_ok = false;
   bool rtc_ok = false;
   bool water_sensor_ok = false;
+  */
 }
 
 bool SensorManager::init()
@@ -42,7 +43,6 @@ bool SensorManager::init()
 
   if (!init_air_qual_sensor())
   {
-    Serial.println(F("ENS160 failed"));
     all_ok = false;
   }
 
@@ -50,7 +50,6 @@ bool SensorManager::init()
 
   if (!init_air_temp_hum_sensor())
   {
-    Serial.println(F("AHT10 failed"));
     all_ok = false;
   }
 
@@ -58,7 +57,6 @@ bool SensorManager::init()
 
   if (!init_light_sensor())
   {
-    Serial.println(F("VEML7700 failed"));
     all_ok = false;
   }
 
@@ -70,13 +68,11 @@ bool SensorManager::init()
 
   if (!readings.soil_sensor_1_ok)
   {
-    Serial.println(F("Soil sensor 1 failed"));
     all_ok = false;
   }
 
   if (!readings.soil_sensor_2_ok)
   {
-    Serial.println(F("Soil sensor 2 failed"));
     all_ok = false;
   }
 
@@ -84,11 +80,8 @@ bool SensorManager::init()
 
   if (!init_rtc())
   {
-    Serial.println(F("RTC failed"));
     all_ok = false;
   }
-
-  Serial.println(F("Sensor initialization complete"));
   return all_ok;
 }
 
@@ -153,7 +146,7 @@ float SensorManager::read_light_sensor()
 
 bool SensorManager::init_air_temp_hum_sensor()
 {
-  if (!aht.begin(eAHT_SensorAddress_default))
+  if (!aht10.begin(AHTXX_I2C_SPEED_HZ, AHTXX_I2C_STRETCH_USEC))
   {
     return false;
   }
@@ -163,18 +156,18 @@ bool SensorManager::init_air_temp_hum_sensor()
 
 float SensorManager::read_air_temp_sensor()
 {
-  return aht.GetTemperature();
+  return aht10.readTemperature();
 }
 
 float SensorManager::read_air_hum_sensor()
 {
-  return aht.GetHumidity();
+  return aht10.readHumidity();
 }
 
 bool SensorManager::init_air_qual_sensor()
 {
-  ens160.begin(&Wire, 0x52); // ENS160_ADDRESS
-  if (!ens160.init())
+  ens160.begin(); // ENS160_ADDRESS
+  if (!ens160.available())
   {
     return false;
   }
@@ -184,7 +177,7 @@ bool SensorManager::init_air_qual_sensor()
 
 float SensorManager::read_air_quality_sensor()
 {
-  return ens160.getAirQualityIndex_UBA();
+  return ens160.getAQI();
 }
 
 bool SensorManager::check_soil_sensor(uint8_t pin)
@@ -207,7 +200,7 @@ uint8_t SensorManager::convert_soil_reading(int raw_value)
 
 bool SensorManager::init_rtc()
 {
-  if (!RTC.read(tm))
+  if (!DS1307RTC::read(tm))
   {
     return false;
   }
@@ -217,7 +210,7 @@ bool SensorManager::init_rtc()
 
 void SensorManager::read_rtc_time()
 {
-  if (RTC.read(tm))
+  if (DS1307RTC::read(tm))
   {
     readings.second = tm.Second;
     readings.minute = tm.Minute;
@@ -234,7 +227,7 @@ void SensorManager::read_rtc_time()
 
 float SensorManager::read_water_distance_sensor()
 {
-  return hc.dist(); // расстояние в см
+  return hc.dist();
 }
 
 float SensorManager::calculate_water_volume(float distance_cm)
