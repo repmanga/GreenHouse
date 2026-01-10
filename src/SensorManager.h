@@ -33,7 +33,7 @@ private:
     };
     
     SensorReadings readings{};
-    
+
     Adafruit_VEML7700 veml;
     AHTxx aht10;
     ScioSense_ENS160 ens160;
@@ -48,8 +48,8 @@ private:
     static const uint16_t LIGHT_HIGH_THRESHOLD = 10000U;
     static const uint16_t TANK_DIAMETER_CM = 100U;
     static const uint16_t TANK_HEIGHT_CM = 30U;
-    static const uint16_t SOIL_DRY_VALUE = 620U;
-    static const uint16_t SOIL_WET_VALUE = 310U;
+    static const uint16_t SOIL_DRY_VALUE = 410U;
+    static const uint16_t SOIL_WET_VALUE = 370U;
     
     bool init_light_sensor();
     bool init_air_temp_hum_sensor();
@@ -61,7 +61,6 @@ private:
     float read_air_hum_sensor();
     float read_air_quality_sensor();
     static uint8_t read_soil_sensor(uint8_t pin);
-    float read_water_distance_sensor();
     void read_rtc_time();
     
     // Вспомогательные
@@ -94,6 +93,13 @@ public:
     float get_water_distance() const { return readings.water_dist_cm; }
     float get_water_volume() const { return readings.water_volume_ml; }
 
+    // TESTED TESTED TESTED TESTED //
+    // I don't know how to fix this -_- //
+    float read_water_distance_sensor() {
+        float val = hc.dist()/10;
+        delay(60);
+        return (val);
+    }
 };
 
 #endif

@@ -9,8 +9,8 @@ const uint8_t ENC_SW = 4;
 const uint8_t LIGHT_PIN = 5;
 const uint8_t FAN_PIN = 6;
 const uint8_t PUMP_PIN = 7;
-const uint8_t LED_PIN = 8;
 /*
+const uint8_t LED_PIN = 8;
 const uint8_t LCD_ADDR = 0x27;
 const uint8_t LCD_COLS = 16;
 const uint8_t LCD_ROWS = 4;
@@ -87,7 +87,7 @@ void runAutoMode() {
         }
         // Включаем насос если слишком сухо
         //TODO:Fix magic number usage
-        if (((sensors.get_soil_moisture_1() + sensors.get_soil_moisture_2()) / 2 < 500) && !devices.isPumpOn()) {
+        if (((sensors.get_soil_moisture_1() + sensors.get_soil_moisture_2() / 2 < 45)) && !devices.isPumpOn()) {
             devices.startPump(100);
         }
 

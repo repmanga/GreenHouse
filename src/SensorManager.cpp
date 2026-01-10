@@ -180,10 +180,15 @@ float SensorManager::read_air_quality_sensor()
   return ens160.getAQI();
 }
 
+// TESTED TESTED TESTED TESTED //
 bool SensorManager::check_soil_sensor(uint8_t pin)
 {
   int value = analogRead(pin);
-  return (value > 10 && value < 1013);
+  if (value > 10 && value < 1013) {
+    return true;
+  } else {
+    return false;
+  }
 }
 
 uint8_t SensorManager::read_soil_sensor(uint8_t pin)
@@ -194,9 +199,11 @@ uint8_t SensorManager::read_soil_sensor(uint8_t pin)
 
 uint8_t SensorManager::convert_soil_reading(int raw_value)
 {
-  int percentage = map(raw_value, SOIL_DRY_VALUE, SOIL_WET_VALUE, 0, 100);
+  int percentage = map(raw_value, SOIL_WET_VALUE, SOIL_DRY_VALUE, 0, 100);
   return constrain(percentage, 0, 100);
 }
+
+// --------------------------- //
 
 bool SensorManager::init_rtc()
 {
@@ -224,11 +231,8 @@ void SensorManager::read_rtc_time()
     readings.rtc_ok = false;
   }
 }
-
-float SensorManager::read_water_distance_sensor()
-{
-  return hc.dist();
-}
+// --------------------------- //
+// TESTED TESTED TESTED TESTED //
 
 float SensorManager::calculate_water_volume(float distance_cm)
 {
@@ -244,7 +248,9 @@ float SensorManager::calculate_water_volume(float distance_cm)
     water_height_cm = TANK_HEIGHT_CM;
   }
   float radius_cm = TANK_DIAMETER_CM / 2.0;
-  float volume_cm3 = PI * radius_cm * radius_cm * water_height_cm;
+  float volume_cm3 = 3.14 * radius_cm * radius_cm * water_height_cm;
 
   return volume_cm3;
 }
+
+// --------------------------- //

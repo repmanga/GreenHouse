@@ -1,6 +1,6 @@
 #include "DeviceManager.h"
 
-DeviceManager::     DeviceManager(uint8_t lightPin, uint8_t fanPin, uint8_t pumpPin) : lightPin(lightPin), fanPin(fanPin), pumpPin(pumpPin)
+DeviceManager::DeviceManager(uint8_t lightPin, uint8_t fanPin, uint8_t pumpPin) : lightPin(lightPin), fanPin(fanPin), pumpPin(pumpPin)
 {
     lightState = false;
     fanState = false;
