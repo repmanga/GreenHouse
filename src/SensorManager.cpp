@@ -62,7 +62,6 @@ bool SensorManager::init()
 
   delay(10);
 
-  // Проверка датчиков почвы
   readings.soil_sensor_1_ok = check_soil_sensor(SOIL_1_PIN);
   readings.soil_sensor_2_ok = check_soil_sensor(SOIL_2_PIN);
 
@@ -130,8 +129,10 @@ bool SensorManager::init_light_sensor()
 {
   if (!veml.begin())
   {
+    Serial.println("VEML7700 FAIL");
     return false;
   }
+  Serial.println("VEML7700 OK");
   veml.setLowThreshold(LIGHT_LOW_THRESHOLD);
   veml.setHighThreshold(LIGHT_HIGH_THRESHOLD);
   veml.interruptEnable(false);
@@ -141,19 +142,21 @@ bool SensorManager::init_light_sensor()
 
 float SensorManager::read_light_sensor()
 {
+  Serial.print("Light lux: ");
+  Serial.println(veml.readLux());
   return veml.readLux();
 }
 
 bool SensorManager::init_air_temp_hum_sensor()
 {
-  if (aht20.getStatus() != AHTXX_NO_ERROR)
+  if (aht20.getStatus() == AHTXX_NO_ERROR && (aht20.readHumidity() < 110) && (aht20.readTemperature() < 70) )
   {
-    Serial.println("AHT20 FAIL");
-    return false;
+      Serial.println("AHT20 OK");
+      readings.air_temp_sensor_ok = true;
+      return true;
   }
-  Serial.println("AHT20 OK");
-  readings.air_temp_sensor_ok = true;
-  return true;
+  Serial.println("AHT20 FAIL");
+  return false;
 }
 
 float SensorManager::read_air_temp_sensor()
@@ -172,7 +175,7 @@ float SensorManager::read_air_hum_sensor()
 
 bool SensorManager::init_air_qual_sensor()
 {
-  ens160.begin(); // ENS160_ADDRESS
+  ens160.begin();
   if (!ens160.available())
   {
     Serial.println("ens160 FAIL");
@@ -191,7 +194,7 @@ float SensorManager::read_air_quality_sensor()
   return ens160.getAQI();
 }
 
-// TESTED TESTED TESTED TESTED //
+
 bool SensorManager::check_soil_sensor(uint8_t pin)
 {
   int value = analogRead(pin);
@@ -225,7 +228,6 @@ uint8_t SensorManager::convert_soil_reading(int raw_value)
   return constrain(percentage, 0, 100);
 }
 
-// --------------------------- //
 
 bool SensorManager::init_rtc()
 {
@@ -241,6 +243,11 @@ void SensorManager::read_rtc_time()
 {
   if (DS1307RTC::read(tm))
   {
+    Serial.print(tm.Hour);
+    Serial.print(":");
+    Serial.print(tm.Minute);
+    Serial.print(":");
+    Serial.println(tm.Second);
     readings.second = tm.Second;
     readings.minute = tm.Minute;
     readings.hour = tm.Hour;
@@ -253,8 +260,8 @@ void SensorManager::read_rtc_time()
     readings.rtc_ok = false;
   }
 }
-// --------------------------- //
-// TESTED TESTED TESTED TESTED //
+
+
 
 float SensorManager::calculate_water_volume(float distance_cm)
 {
@@ -275,4 +282,3 @@ float SensorManager::calculate_water_volume(float distance_cm)
   return volume_cm3;
 }
 
-// --------------------------- //

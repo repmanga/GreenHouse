@@ -93,7 +93,6 @@ public:
     float get_water_distance() const { return readings.water_dist_cm; }
     float get_water_volume() const { return readings.water_volume_ml; }
 
-    // TESTED TESTED TESTED TESTED //
     // I don't know how to fix this -_- //
     float read_water_distance_sensor() {
         float val = hc.dist()/10;

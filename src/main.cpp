@@ -73,19 +73,19 @@ void runAutoMode() {
     static uint32_t lastAutoAction = 0;
     if (millis() - lastAutoAction > 10000) {  // Каждые 10 секунд
         lastAutoAction = millis();
-        // Включаем свет если темно
+
         if (sensors.get_light_level() < 100 && !devices.isLightOn()) {
             devices.setLight(true);
         } else if (sensors.get_light_level() > 500 && devices.isLightOn()) {
             devices.setLight(false);
         }
-        // Включаем вентилятор если валжно или жарко
+
         if (((sensors.get_air_temp() > 28) || (sensors.get_air_humidity() > 90) || (sensors.get_air_quality() > 60)) && !devices.isFanOn()) {
             devices.setFan(true);
         } else if ((sensors.get_air_temp() < 25  || (sensors.get_air_humidity() < 70)) && devices.isFanOn()) {
             devices.setFan(false);
         }
-        // Включаем насос если слишком сухо
+
         //TODO:Fix magic number usage
         if (((sensors.get_soil_moisture_1() + sensors.get_soil_moisture_2() / 2 < 45)) && !devices.isPumpOn()) {
             devices.startPump(100);
