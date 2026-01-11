@@ -24,7 +24,7 @@ bool systemAutoMode = true;
 void runAutoMode();
 
 void setup() {
-    //Serial.begin(115200);
+    Serial.begin(9600);
     //delay(1000);
     sensors.init();
     devices.init();
@@ -80,7 +80,7 @@ void runAutoMode() {
             devices.setLight(false);
         }
         // Включаем вентилятор если валжно или жарко
-        if (((sensors.get_air_temp() > 28) || (sensors.get_air_humidity() > 90)) && !devices.isFanOn()) {
+        if (((sensors.get_air_temp() > 28) || (sensors.get_air_humidity() > 90) || (sensors.get_air_quality() > 60)) && !devices.isFanOn()) {
             devices.setFan(true);
         } else if ((sensors.get_air_temp() < 25  || (sensors.get_air_humidity() < 70)) && devices.isFanOn()) {
             devices.setFan(false);

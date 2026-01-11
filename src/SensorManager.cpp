@@ -1,6 +1,6 @@
 #include "SensorManager.h"
 
-SensorManager::SensorManager() : hc(TRIG_PIN, ECHO_PIN)
+SensorManager::SensorManager() : hc(TRIG_PIN, ECHO_PIN) , ens160(ENS160_I2CADDR_1), aht20(AHTXX_ADDRESS_X38, AHT2x_SENSOR)
 {
   float light_lux = 0;
   float air_temp = 0;
@@ -146,22 +146,28 @@ float SensorManager::read_light_sensor()
 
 bool SensorManager::init_air_temp_hum_sensor()
 {
-  if (!aht10.begin(AHTXX_I2C_SPEED_HZ, AHTXX_I2C_STRETCH_USEC))
+  if (aht20.getStatus() != AHTXX_NO_ERROR)
   {
+    Serial.println("AHT20 FAIL");
     return false;
   }
+  Serial.println("AHT20 OK");
   readings.air_temp_sensor_ok = true;
   return true;
 }
 
 float SensorManager::read_air_temp_sensor()
 {
-  return aht10.readTemperature();
+  Serial.print("Air temperature: ");
+  Serial.println(aht20.readTemperature());
+  return aht20.readTemperature();
 }
 
 float SensorManager::read_air_hum_sensor()
 {
-  return aht10.readHumidity();
+  Serial.print("Air humidity: ");
+  Serial.println(aht20.readHumidity());
+  return aht20.readHumidity();
 }
 
 bool SensorManager::init_air_qual_sensor()
@@ -169,14 +175,19 @@ bool SensorManager::init_air_qual_sensor()
   ens160.begin(); // ENS160_ADDRESS
   if (!ens160.available())
   {
+    Serial.println("ens160 FAIL");
     return false;
   }
+  Serial.println("ens160 OK");
   readings.air_qual_sensor_ok = true;
   return true;
 }
 
 float SensorManager::read_air_quality_sensor()
 {
+  //ens160.getCO2();
+  Serial.print("AQI: ");
+  Serial.println(ens160.getAQI());
   return ens160.getAQI();
 }
 
@@ -184,22 +195,33 @@ float SensorManager::read_air_quality_sensor()
 bool SensorManager::check_soil_sensor(uint8_t pin)
 {
   int value = analogRead(pin);
-  if (value > 10 && value < 1013) {
-    return true;
-  } else {
+  //TODO: Add some more robust logic to test sensor (this logic if not working)
+  if (value < 320) {
+    Serial.print("Soil sensor on pin ");
+    Serial.print(pin);
+    Serial.println(" FAIL");
     return false;
+  } else {
+    Serial.print("Soil sensor on pin ");
+    Serial.print(pin);
+    Serial.println(" OK");
+    return true;
   }
 }
 
 uint8_t SensorManager::read_soil_sensor(uint8_t pin)
 {
   int raw = analogRead(pin);
+  Serial.print("Soil sensor on pin ");
+  Serial.print(pin);
+  Serial.print(" raw value: ");
+  Serial.println(raw);
   return convert_soil_reading(raw);
 }
 
 uint8_t SensorManager::convert_soil_reading(int raw_value)
 {
-  int percentage = map(raw_value, SOIL_WET_VALUE, SOIL_DRY_VALUE, 0, 100);
+  int percentage = map(raw_value, SOIL_DRY_VALUE, SOIL_WET_VALUE, 0, 100);
   return constrain(percentage, 0, 100);
 }
 
