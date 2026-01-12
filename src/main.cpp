@@ -31,9 +31,8 @@ void setup() {
 }
 
 void loop() {
-    // 1. Обновление датчиков (каждые 2 секунды)
     static uint32_t lastSensorUpdate = 0;
-    if (millis() - lastSensorUpdate > 2000) {
+    if (millis() - lastSensorUpdate > 5000) {
         sensors.update_all();
         lastSensorUpdate = millis();
         /*
@@ -64,7 +63,7 @@ void loop() {
     if (systemAutoMode) {
         runAutoMode();
     }
-    delay(10);
+    delay(50);
 }
 
 // TODO: complete autologic with watering, complete error handler
@@ -82,7 +81,7 @@ void runAutoMode() {
 
         if (((sensors.get_air_temp() > 28) || (sensors.get_air_humidity() > 90) || (sensors.get_air_quality() > 60)) && !devices.isFanOn()) {
             devices.setFan(true);
-        } else if ((sensors.get_air_temp() < 25  || (sensors.get_air_humidity() < 70)) && devices.isFanOn()) {
+        } else if ((sensors.get_air_temp() < 25  || (sensors.get_air_humidity() < 70) || (sensors.get_air_quality() < 50)) && devices.isFanOn()) {
             devices.setFan(false);
         }
 
