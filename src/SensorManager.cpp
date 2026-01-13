@@ -233,8 +233,10 @@ bool SensorManager::init_rtc()
 {
   if (!DS1307RTC::read(tm))
   {
-    return false;
+      Serial.println("RTC FAIL");
+      return false;
   }
+  Serial.println("RTC OK");
   readings.rtc_ok = true;
   return true;
 }

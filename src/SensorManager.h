@@ -92,8 +92,12 @@ public:
     uint16_t get_soil_moisture_2() const { return readings.soil_moist_2; }
     float get_water_distance() const { return readings.water_dist_cm; }
     float get_water_volume() const { return readings.water_volume_ml; }
-
-
+    uint8_t get_hour() const { return readings.hour;}
+    uint8_t get_minute() const { return readings.minute;}
+    uint8_t get_second() const { return readings.second;}
+    uint16_t get_year() const  { return readings.year;}
+    uint8_t get_month() const { return readings.month;}
+    uint8_t get_day() const {return readings.day;}
     // I don't know how to fix this -_- //
     float read_water_distance_sensor() {
         float val = hc.dist()/10;
