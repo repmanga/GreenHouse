@@ -114,7 +114,7 @@ void GreenhouseDisplay::showTempHum() {
     lcd->print("H:");
     lcd->print(formatHumidity());
     lcd->print("%");
-
+    /*
     // Качество воздуха на второй строке
     lcd->setCursor(0, 1);
     lcd->print("AQI:");
@@ -129,6 +129,14 @@ void GreenhouseDisplay::showTempHum() {
     } else {
         lcd->print("Poor");
     }
+    */
+    // Качество воздуха на второй строке
+    lcd->setCursor(0, 1);
+    lcd->print("CO2:");
+    lcd->print(data.airQuality);
+
+    // Индикатор качества
+    lcd->setCursor(9, 1);
 }
 
 // Режим: Влажность почвы
@@ -142,12 +150,12 @@ void GreenhouseDisplay::showSoil() {
     lcd->print("S1:");
     lcd->print(data.soilMoisture1);
     lcd->print("% ");
-
+    /*
     lcd->setCursor(8, 1);
     lcd->print("S2:");
     lcd->print(data.soilMoisture2);
     lcd->print("%");
-
+    */
     // Графический индикатор средней влажности
     lcd->setCursor(14, 1);
     uint8_t level = map(avgSoil, 0, 100, 0, 5);
@@ -167,15 +175,15 @@ void GreenhouseDisplay::showSoil() {
 // Режим: Освещенность и вода
 void GreenhouseDisplay::showLightWater() {
     lcd->setCursor(0, 0);
-    lcd->print("Light: ");
+    lcd->print("Light:");
     lcd->print(formatLight());
 
     lcd->setCursor(0, 1);
-    lcd->print("Water: ");
+    lcd->print("Water:");
     lcd->print(formatWater());
 
     // Индикатор уровня воды (графический)
-    lcd->setCursor(14, 1);
+    lcd->setCursor(15, 1);
     if (data.waterVolume > 2000) {
         lcd->write(5);  // Полный
     } else if (data.waterVolume > 1000) {
@@ -205,7 +213,7 @@ void GreenhouseDisplay::showSystem() {
     lcd->print("F:");
     lcd->print(data.fanOn ? "ON " : "OFF");
 
-    lcd->setCursor(10, 1);
+    lcd->setCursor(11, 1);
     lcd->print("P:");
     lcd->print(data.pumpOn ? "ON" : "OFF");
 }
@@ -253,7 +261,7 @@ void GreenhouseDisplay::drawStatusIndicators() {
     }
 
     // Индикатор ошибки или состояния
-    lcd->setCursor(15, 1);
+    lcd->setCursor(15, 0);
     if (data.hasError) {
         lcd->print("!");
     } else if (data.pumpOn) {
@@ -263,7 +271,7 @@ void GreenhouseDisplay::drawStatusIndicators() {
     } else if (data.fanOn && blinkState) {
         lcd->print("~");
     } else {
-        lcd->print(" ");
+        lcd->print("");
     }
 }
 
@@ -292,7 +300,7 @@ String GreenhouseDisplay::formatTemperature() {
 // Форматирование влажности
 String GreenhouseDisplay::formatHumidity() {
     char buffer[6];
-    dtostrf(data.humidity, 3, 0, buffer);
+    dtostrf(data.humidity, 2, 0, buffer);
     return String(buffer);
 }
 

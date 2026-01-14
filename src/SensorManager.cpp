@@ -190,8 +190,8 @@ float SensorManager::read_air_quality_sensor()
 {
   //ens160.getCO2();
   Serial.print("AQI: ");
-  Serial.println(ens160.getAQI());
-  return ens160.getAQI();
+  Serial.println(ens160.geteCO2());
+  return ens160.geteCO2();//getAQI();
 }
 
 
