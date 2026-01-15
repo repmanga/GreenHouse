@@ -62,7 +62,11 @@ void GreenhouseDisplay::update() {
 // Обновление отображения
 void GreenhouseDisplay::updateDisplay() {
     lcd->clear();
-
+    if (data.lightLevel < 100){
+        backlightOff();
+    } else {
+        backlightOn();
+    }
     if (data.hasError) {
         showError();
     } else {

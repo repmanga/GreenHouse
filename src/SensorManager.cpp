@@ -189,7 +189,7 @@ bool SensorManager::init_air_qual_sensor()
 float SensorManager::read_air_quality_sensor()
 {
   //ens160.getCO2();
-  Serial.print("AQI: ");
+  Serial.print("CO2: ");
   Serial.println(ens160.geteCO2());
   return ens160.geteCO2();//getAQI();
 }
@@ -199,6 +199,7 @@ bool SensorManager::check_soil_sensor(uint8_t pin)
 {
   int value = analogRead(pin);
   //TODO: Add some more robust logic to test sensor (this logic if not working)
+  /*
   if (value < 320) {
     Serial.print("Soil sensor on pin ");
     Serial.print(pin);
@@ -209,7 +210,11 @@ bool SensorManager::check_soil_sensor(uint8_t pin)
     Serial.print(pin);
     Serial.println(" OK");
     return true;
-  }
+  }*/
+  Serial.print("Soil sensor on pin ");
+  Serial.print(pin);
+  Serial.println(" OK");
+  return true;
 }
 
 uint8_t SensorManager::read_soil_sensor(uint8_t pin)

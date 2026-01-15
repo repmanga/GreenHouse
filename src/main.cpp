@@ -23,16 +23,6 @@ void loop() {
         updateDisplayWithSensorData();
         lastSensorUpdate = millis();
     }
-    /*
-    // 2. Обновление состояния устройств в UI
-    UIController::DeviceState devState;
-    devState.lightOn = devices.isLightOn();
-    devState.fanOn = devices.isFanOn();
-    devState.pumpOn = devices.isPumpOn();
-    
-    ui.setDeviceState(devState);
-    ui.setSystemMode(systemAutoMode);
-    */
     // 3. Обновление UI
     display.update();
     //4. Обновление устройств (для насоса с автостопом)
@@ -46,7 +36,7 @@ void loop() {
 
 // TODO: complete autologic with watering, complete error handler
 void runAutoMode() {
-    // Простейшая логика автоматического режима
+
     static uint32_t lastAutoAction = 0;
     if (millis() - lastAutoAction > 10000) {  // Каждые 10 секунд
         lastAutoAction = millis();
@@ -64,8 +54,9 @@ void runAutoMode() {
         }
 
         //TODO:Fix magic number usage
-        if (((sensors.get_soil_moisture_1() < 45)) && !devices.isPumpOn()) {
-            devices.startPump(100);
+        if (((sensors.get_soil_moisture_1() < 20))) {
+            //devices.startPump(100);
+            display.showMessage("WATER", "NOW",50000);
         }
 
     }
