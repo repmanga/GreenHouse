@@ -41,22 +41,26 @@ void runAutoMode() {
     if (millis() - lastAutoAction > 10000) {  // Каждые 10 секунд
         lastAutoAction = millis();
 
-        if ((sensors.get_light_level() < 50 || sensors.get_hour() > 20 || sensors.get_hour() < 8)&& !devices.isLightOn()) {
+        if ((sensors.get_light_level() < 50 || sensors.get_hour() > 20 || sensors.get_hour() < 8) &&
+            !devices.isLightOn()) {
             devices.setLight(true);
         } else if ((sensors.get_light_level() > 500 && sensors.get_hour() > 8) && devices.isLightOn()) {
             devices.setLight(false);
         }
 
-        if (((sensors.get_air_temp() > 28) || (sensors.get_air_humidity() > 75) || (sensors.get_air_quality() > 60)) && !devices.isFanOn()) {
+        if (((sensors.get_air_temp() > 35) || (sensors.get_air_humidity() > 85) || (sensors.get_air_CO2() > 1200)) &&
+            !devices.isFanOn()) {
             devices.setFan(true);
-        } else if ((sensors.get_air_temp() < 25  || (sensors.get_air_humidity() < 60) || (sensors.get_air_quality() < 50)) && devices.isFanOn()) {
+        } else if ((sensors.get_air_temp() < 25 || (sensors.get_air_humidity() < 60) ||
+                    (sensors.get_air_CO2() < 50)) && devices.isFanOn()) {
             devices.setFan(false);
         }
 
         //TODO:Fix magic number usage
         if (((sensors.get_soil_moisture_1() < 20))) {
             //devices.startPump(100);
-            display.showMessage("WATER", "NOW",50000);
+            display.backlightOn();
+            display.showMessage("WATER", "NOW", 50000);
         }
 
     }
@@ -70,7 +74,7 @@ void updateDisplayWithSensorData() {
     display.setSoilMoisture2(sensors.get_soil_moisture_2());
     display.setLightLevel(sensors.get_light_level());
     display.setWaterVolume(sensors.get_water_volume());
-    display.setAirQuality(sensors.get_air_quality());
+    display.setAirQuality(sensors.get_air_CO2());
     display.setTime(sensors.get_hour(),sensors.get_minute());
     // Передача состояния устройств
     display.setLightState(devices.isLightOn());

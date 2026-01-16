@@ -176,6 +176,8 @@ float SensorManager::read_air_hum_sensor()
 bool SensorManager::init_air_qual_sensor()
 {
   ens160.begin();
+  ens160.setMode(ENS160_OPMODE_STD);
+  delay(100);
   if (!ens160.available())
   {
     Serial.println("ens160 FAIL");
@@ -188,10 +190,15 @@ bool SensorManager::init_air_qual_sensor()
 
 float SensorManager::read_air_quality_sensor()
 {
-  //ens160.getCO2();
-  Serial.print("CO2: ");
-  Serial.println(ens160.geteCO2());
-  return ens160.geteCO2();//getAQI();
+    static uint16_t val = 0;
+    delay(100);
+    if (ens160.available()) {
+        ens160.measure(true);
+        Serial.print("СO2: ");
+        Serial.println(ens160.geteCO2());
+        val = ens160.geteCO2();
+    }
+  return val;
 }
 
 

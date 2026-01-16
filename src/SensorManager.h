@@ -35,8 +35,8 @@ private:
     SensorReadings readings{};
 
     Adafruit_VEML7700 veml;
-    AHTxx aht20;
     ScioSense_ENS160 ens160;
+    AHTxx aht20;
     HCSR04 hc;
     tmElements_t tm{};
 
@@ -49,7 +49,7 @@ private:
     static const uint16_t TANK_DIAMETER_CM = 100U;
     static const uint16_t TANK_HEIGHT_CM = 30U;
     static const uint16_t SOIL_DRY_VALUE = 470U;
-    static const uint16_t SOIL_WET_VALUE = 350U;
+    static const uint16_t SOIL_WET_VALUE = 200U;
 
     bool init_light_sensor();
     bool init_air_temp_hum_sensor();
@@ -87,7 +87,7 @@ public:
     float get_light_level() const { return readings.light_lux; }
     float get_air_temp() const { return readings.air_temp; }
     float get_air_humidity() const { return readings.air_hum; }
-    float get_air_quality() const { return readings.air_qual; }
+    float get_air_CO2() const { return readings.air_qual; }
     uint16_t get_soil_moisture_1() const { return readings.soil_moist_1; }
     uint16_t get_soil_moisture_2() const { return readings.soil_moist_2; }
     float get_water_distance() const { return readings.water_dist_cm; }
